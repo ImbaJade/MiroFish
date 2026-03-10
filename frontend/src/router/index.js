@@ -5,48 +5,95 @@ import SimulationView from '../views/SimulationView.vue'
 import SimulationRunView from '../views/SimulationRunView.vue'
 import ReportView from '../views/ReportView.vue'
 import InteractionView from '../views/InteractionView.vue'
+import LoginView from '../views/LoginView.vue'
+import { isAuthenticated } from '../utils/auth'
 
 const routes = [
   {
+    path: '/login',
+    name: 'Login',
+    component: LoginView,
+    meta: {
+      requiresAuth: false
+    }
+  },
+  {
     path: '/',
     name: 'Home',
-    component: Home
+    component: Home,
+    meta: {
+      requiresAuth: true
+    }
   },
   {
     path: '/process/:projectId',
     name: 'Process',
     component: Process,
-    props: true
+    props: true,
+    meta: {
+      requiresAuth: true
+    }
   },
   {
     path: '/simulation/:simulationId',
     name: 'Simulation',
     component: SimulationView,
-    props: true
+    props: true,
+    meta: {
+      requiresAuth: true
+    }
   },
   {
     path: '/simulation/:simulationId/start',
     name: 'SimulationRun',
     component: SimulationRunView,
-    props: true
+    props: true,
+    meta: {
+      requiresAuth: true
+    }
   },
   {
     path: '/report/:reportId',
     name: 'Report',
     component: ReportView,
-    props: true
+    props: true,
+    meta: {
+      requiresAuth: true
+    }
   },
   {
     path: '/interaction/:reportId',
     name: 'Interaction',
     component: InteractionView,
-    props: true
+    props: true,
+    meta: {
+      requiresAuth: true
+    }
   }
 ]
 
 const router = createRouter({
   history: createWebHistory(),
   routes
+})
+
+router.beforeEach((to) => {
+  if (to.meta.requiresAuth && !isAuthenticated()) {
+    return {
+      name: 'Login',
+      query: {
+        redirect: to.fullPath
+      }
+    }
+  }
+
+  if (to.name === 'Login' && isAuthenticated()) {
+    return {
+      name: 'Home'
+    }
+  }
+
+  return true
 })
 
 export default router

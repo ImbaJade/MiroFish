@@ -12,3 +12,18 @@ services:
     restart: unless-stopped
     volumes:
       - ./backend/uploads:/app/backend/uploads
+
+  # 纯离线可选：本地开源 LLM（Ollama）
+  # 使用方式：docker compose --profile offline up -d
+  ollama:
+    image: ollama/ollama:latest
+    container_name: mirofish-ollama
+    profiles: ["offline"]
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    restart: unless-stopped
+
+volumes:
+  ollama_data:

@@ -1,8 +1,8 @@
 FROM python:3.11
 
-# 安装 Node.js （满足 >=18）及必要工具
+# 安装 Node.js（满足 >=18）及 Python 编译依赖
 RUN apt-get update \
-  && apt-get install -y --no-install-recommends nodejs npm \
+  && apt-get install -y --no-install-recommends nodejs npm build-essential curl \
   && rm -rf /var/lib/apt/lists/*
 
 # 从 uv 官方镜像复制 uv
@@ -13,12 +13,14 @@ WORKDIR /app
 # 先复制依赖描述文件以利用缓存
 COPY package.json package-lock.json ./
 COPY frontend/package.json frontend/package-lock.json ./frontend/
-COPY backend/pyproject.toml backend/uv.lock ./backend/
+COPY backend/pyproject.toml backend/uv.lock backend/requirements.txt ./backend/
 
 # 安装依赖（Node + Python）
 RUN npm ci \
   && npm ci --prefix frontend \
-  && cd backend && uv sync --frozen
+  && cd backend \
+  && uv sync --frozen \
+  && uv pip install --python .venv/bin/python -r requirements.txt
 
 # 复制项目源码
 COPY . .

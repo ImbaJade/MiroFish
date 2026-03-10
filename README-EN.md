@@ -100,20 +100,20 @@ The backend now supports an offline graph-memory backend:
 - `MEMORY_BACKEND=mem0`: local graph + mem0 semantic memory retrieval (closer to Zep-like search experience).
 - `OFFLINE_MODE=true`: relaxes cloud-key validation for air-gapped environments.
 
-Recommended with a local open-source LLM (e.g. Ollama):
+Recommended with a locally deployed OpenAI-compatible LLM service (e.g. vLLM):
 
 ```env
 OFFLINE_MODE=true
 MEMORY_BACKEND=mem0
-LLM_BASE_URL=http://127.0.0.1:11434/v1
-LLM_MODEL_NAME=qwen2.5:14b
+LLM_BASE_URL=http://host.docker.internal:8000/v1
+LLM_MODEL_NAME=Qwen/Qwen2.5-14B-Instruct
 LLM_API_KEY=offline-local-key
 ```
 
-With Docker Compose, start Ollama via offline profile:
+With Docker Compose, start MiroFish and connect to your already deployed local model services:
 
 ```bash
-docker compose --profile offline up -d
+docker compose up -d
 ```
 
 > `MEMORY_BACKEND=zep` remains supported; if `mem0` package is unavailable, backend gracefully falls back to `local`.

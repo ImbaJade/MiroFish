@@ -16,9 +16,9 @@ from dataclasses import dataclass, field
 from datetime import datetime
 
 from openai import OpenAI
-from zep_cloud.client import Zep
 
 from ..config import Config
+from .graph_client import get_graph_client
 from ..utils.logger import get_logger
 from .zep_entity_reader import EntityNode, ZepEntityReader
 
@@ -202,9 +202,9 @@ class OasisProfileGenerator:
         self.zep_client = None
         self.graph_id = graph_id
         
-        if self.zep_api_key:
+        if self.graph_id and (Config.MEMORY_BACKEND.lower() == "local" or self.zep_api_key):
             try:
-                self.zep_client = Zep(api_key=self.zep_api_key)
+                self.zep_client = get_graph_client(api_key=self.zep_api_key)
             except Exception as e:
                 logger.warning(f"Zep客户端初始化失败: {e}")
     

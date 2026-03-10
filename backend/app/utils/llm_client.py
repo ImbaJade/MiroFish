@@ -25,7 +25,10 @@ class LLMClient:
         self.model = model or Config.LLM_MODEL_NAME
         
         if not self.api_key:
-            raise ValueError("LLM_API_KEY 未配置")
+            if 'localhost' in (self.base_url or '') or '127.0.0.1' in (self.base_url or '') or Config.OFFLINE_MODE:
+                self.api_key = 'offline-local-key'
+            else:
+                raise ValueError("LLM_API_KEY 未配置")
         
         self.client = OpenAI(
             api_key=self.api_key,

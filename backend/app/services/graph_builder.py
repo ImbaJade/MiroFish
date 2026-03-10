@@ -10,8 +10,7 @@ import threading
 from typing import Dict, Any, List, Optional, Callable
 from dataclasses import dataclass
 
-from zep_cloud.client import Zep
-from zep_cloud import EpisodeData, EntityEdgeSourceTarget
+from .graph_client import get_graph_client, EpisodeData, EntityEdgeSourceTarget
 
 from ..config import Config
 from ..models.task import TaskManager, TaskStatus
@@ -44,10 +43,10 @@ class GraphBuilderService:
     
     def __init__(self, api_key: Optional[str] = None):
         self.api_key = api_key or Config.ZEP_API_KEY
-        if not self.api_key:
+        if Config.MEMORY_BACKEND.lower() == 'zep' and not self.api_key:
             raise ValueError("ZEP_API_KEY 未配置")
         
-        self.client = Zep(api_key=self.api_key)
+        self.client = get_graph_client(api_key=self.api_key)
         self.task_manager = TaskManager()
     
     def build_graph_async(
@@ -198,6 +197,14 @@ class GraphBuilderService:
     
     def set_ontology(self, graph_id: str, ontology: Dict[str, Any]):
         """设置图谱本体（公开方法）"""
+        if getattr(self.client, "is_local", False):
+            self.client.graph.set_ontology(
+                graph_ids=[graph_id],
+                entities=ontology.get("entity_types", []),
+                edges=ontology.get("edge_types", []),
+            )
+            return
+
         import warnings
         from typing import Optional
         from pydantic import Field

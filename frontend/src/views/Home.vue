@@ -7,6 +7,7 @@
         <a href="https://github.com/666ghj/MiroFish" target="_blank" class="github-link">
           访问我们的Github主页 <span class="arrow">↗</span>
         </a>
+        <button class="logout-btn" @click="handleLogout">退出登录</button>
       </div>
     </nav>
 
@@ -210,6 +211,7 @@
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import HistoryDatabase from '../components/HistoryDatabase.vue'
+import { logout } from '../utils/auth'
 
 const router = useRouter()
 
@@ -233,6 +235,11 @@ const fileInput = ref(null)
 const canSubmit = computed(() => {
   return formData.value.simulationRequirement.trim() !== '' && files.value.length > 0
 })
+
+const handleLogout = () => {
+  logout()
+  router.push('/login')
+}
 
 // 触发文件选择
 const triggerFileInput = () => {
@@ -351,6 +358,22 @@ const startSimulation = () => {
 .nav-links {
   display: flex;
   align-items: center;
+}
+
+.logout-btn {
+  margin-left: 12px;
+  border: 1px solid #000000;
+  background: #ffffff;
+  color: #000000;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.logout-btn:hover {
+  background: #000000;
+  color: #ffffff;
 }
 
 .github-link {

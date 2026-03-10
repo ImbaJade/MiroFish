@@ -32,7 +32,12 @@ class Config:
     LLM_BASE_URL = os.environ.get('LLM_BASE_URL', 'https://api.openai.com/v1')
     LLM_MODEL_NAME = os.environ.get('LLM_MODEL_NAME', 'gpt-4o-mini')
     
-    # Zep配置
+    # 图记忆后端配置
+    OFFLINE_MODE = os.environ.get('OFFLINE_MODE', 'false').lower() == 'true'
+    # 可选: zep | local | mem0
+    MEMORY_BACKEND = os.environ.get('MEMORY_BACKEND', 'local' if OFFLINE_MODE else 'zep')
+
+    # Zep配置（当 MEMORY_BACKEND=zep 时需要）
     ZEP_API_KEY = os.environ.get('ZEP_API_KEY')
     
     # 文件上传配置
@@ -67,9 +72,11 @@ class Config:
     def validate(cls):
         """验证必要配置"""
         errors = []
-        if not cls.LLM_API_KEY:
-            errors.append("LLM_API_KEY 未配置")
-        if not cls.ZEP_API_KEY:
-            errors.append("ZEP_API_KEY 未配置")
+        if not cls.LLM_API_KEY and not cls.OFFLINE_MODE:
+            errors.append("LLM_API_KEY 未配置（离线模式可忽略）")
+        if cls.MEMORY_BACKEND.lower() not in {'zep', 'local', 'mem0'}:
+            errors.append("MEMORY_BACKEND 仅支持 zep/local/mem0")
+        if cls.MEMORY_BACKEND.lower() == 'zep' and not cls.ZEP_API_KEY:
+            errors.append("ZEP_API_KEY 未配置（MEMORY_BACKEND=zep 时必填）")
         return errors
 

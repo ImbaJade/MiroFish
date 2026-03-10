@@ -91,6 +91,33 @@ Click the image to watch MiroFish's deep prediction of the lost ending based on 
 4. **Report Generation**: ReportAgent with rich toolset for deep interaction with post-simulation environment
 5. **Deep Interaction**: Chat with any agent in the simulated world & Interact with ReportAgent
 
+
+## 📴 Offline Deployment (Open-source replacements for online dependencies)
+
+The backend now supports an offline graph-memory backend:
+
+- `MEMORY_BACKEND=local`: built-in local JSON graph store with hybrid retrieval (no Zep Cloud dependency).
+- `MEMORY_BACKEND=mem0`: local graph + mem0 semantic memory retrieval (closer to Zep-like search experience).
+- `OFFLINE_MODE=true`: relaxes cloud-key validation for air-gapped environments.
+
+Recommended with a local open-source LLM (e.g. Ollama):
+
+```env
+OFFLINE_MODE=true
+MEMORY_BACKEND=mem0
+LLM_BASE_URL=http://127.0.0.1:11434/v1
+LLM_MODEL_NAME=qwen2.5:14b
+LLM_API_KEY=offline-local-key
+```
+
+With Docker Compose, start Ollama via offline profile:
+
+```bash
+docker compose --profile offline up -d
+```
+
+> `MEMORY_BACKEND=zep` remains supported; if `mem0` package is unavailable, backend gracefully falls back to `local`.
+
 ## 🚀 Quick Start
 
 ### Option 1: Source Code Deployment (Recommended)

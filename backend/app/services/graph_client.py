@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import json
 import math
+import os
 import re
 import uuid
 from collections import Counter
@@ -53,6 +54,35 @@ except ImportError:
 
 def _obj(**kwargs):
     return SimpleNamespace(**kwargs)
+
+
+def _normalize_api_key(api_key: Optional[str]) -> Optional[str]:
+    if not api_key:
+        return api_key
+    key = api_key.strip()
+    if key.lower().startswith("bearer "):
+        key = key[7:].strip()
+    return key or None
+
+
+def _prepare_mem0_openai_env() -> None:
+    """为 mem0 初始化准备 OpenAI 兼容环境变量。"""
+    openai_api_key = _normalize_api_key(os.environ.get("OPENAI_API_KEY"))
+    if not openai_api_key:
+        openai_api_key = _normalize_api_key(Config.EMBEDDING_API_KEY) or _normalize_api_key(Config.LLM_API_KEY)
+        if openai_api_key:
+            os.environ["OPENAI_API_KEY"] = openai_api_key
+
+    # 部分离线 OpenAI 兼容服务并不验证 key，这里兜底一个占位值，避免 mem0 客户端初始化即失败
+    if not os.environ.get("OPENAI_API_KEY"):
+        os.environ["OPENAI_API_KEY"] = "offline-local-key"
+
+    openai_base_url = os.environ.get("OPENAI_BASE_URL")
+    if not openai_base_url:
+        openai_base_url = Config.EMBEDDING_API_BASE_URL or Config.LLM_BASE_URL
+        if openai_base_url:
+            os.environ["OPENAI_BASE_URL"] = openai_base_url
+
 
 
 class _LocalStore:
@@ -401,6 +431,8 @@ class Mem0GraphClient:
 
         try:
             from mem0 import Memory  # type: ignore
+
+            _prepare_mem0_openai_env()
 
             cfg = {
                 "version": "v1.1",

@@ -1,28 +1,29 @@
+import request from '../api'
+
 const TOKEN_KEY = 'mirofish_auth_token'
 
-export const login = ({ username, password }) => {
-  const validUsername = 'admin'
-  const validPassword = 'MiroFish123'
+export const login = async ({ username, password }) => {
+  const response = await request.post('/api/auth/login', {
+    username,
+    password
+  })
 
-  if (username !== validUsername || password !== validPassword) {
+  const token = response?.data?.token
+  if (!token) {
     return {
       success: false,
-      message: '用户名或密码错误'
+      message: '登录失败：未获取到令牌'
     }
   }
 
-  const authToken = `mirofish-${Date.now()}`
-  localStorage.setItem(TOKEN_KEY, authToken)
-
-  return {
-    success: true
-  }
+  localStorage.setItem(TOKEN_KEY, token)
+  return { success: true }
 }
 
 export const logout = () => {
   localStorage.removeItem(TOKEN_KEY)
 }
 
-export const isAuthenticated = () => {
-  return Boolean(localStorage.getItem(TOKEN_KEY))
-}
+export const getToken = () => localStorage.getItem(TOKEN_KEY)
+
+export const isAuthenticated = () => Boolean(getToken())

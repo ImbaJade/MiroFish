@@ -116,6 +116,25 @@ With Docker Compose, start MiroFish and connect to your already deployed local m
 docker compose up -d
 ```
 
+Install mem0 for offline source deployment:
+
+```bash
+cd backend
+pip install "mem0ai>=0.1.0" "chromadb>=0.5.0"
+```
+
+Quick sanity check:
+
+```bash
+python - <<'PY'
+from mem0 import Memory
+print("mem0 import ok")
+PY
+```
+
+> mem0 in this project uses a local Chroma store (default path: `backend/uploads/mem0_store`) and does not require a separate mem0 cloud URL.
+> If you use a local OpenAI-compatible endpoint (Ollama/vLLM), configure `LLM_BASE_URL/LLM_API_KEY`; the app bridges them to `OPENAI_BASE_URL/OPENAI_API_KEY` for mem0.
+
 For fully air-gapped deployment, prepare and transfer the image from an online machine first:
 
 ```bash

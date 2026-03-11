@@ -32,6 +32,17 @@ class Config:
     LLM_BASE_URL = os.environ.get('LLM_BASE_URL', 'https://api.openai.com/v1')
     LLM_MODEL_NAME = os.environ.get('LLM_MODEL_NAME', 'gpt-4o-mini')
     
+    # 可选：向量化服务（用于 mem0 / 语义增强）
+    EMBEDDING_API_BASE_URL = os.environ.get('EMBEDDING_API_BASE_URL')
+    EMBEDDING_API_KEY = os.environ.get('EMBEDDING_API_KEY')
+    EMBEDDING_MODEL_NAME = os.environ.get('EMBEDDING_MODEL_NAME')
+    
+    # 登录鉴权配置
+    AUTH_ENABLED = os.environ.get('AUTH_ENABLED', 'true').lower() == 'true'
+    AUTH_USERNAME = os.environ.get('AUTH_USERNAME', 'admin')
+    AUTH_PASSWORD = os.environ.get('AUTH_PASSWORD', 'MiroFish123')
+    AUTH_TOKEN_EXPIRE_SECONDS = int(os.environ.get('AUTH_TOKEN_EXPIRE_SECONDS', '86400'))
+    
     # 图记忆后端配置
     OFFLINE_MODE = os.environ.get('OFFLINE_MODE', 'false').lower() == 'true'
     # 可选: zep | local | mem0

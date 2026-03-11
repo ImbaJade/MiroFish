@@ -30,7 +30,7 @@
         <button class="submit-btn" type="submit">登录</button>
       </form>
 
-      <p class="tips">演示账号：admin / MiroFish123</p>
+      <p class="tips">账号密码由后端 .env 中 AUTH_USERNAME / AUTH_PASSWORD 配置</p>
     </div>
   </div>
 </template>
@@ -50,19 +50,25 @@ const form = reactive({
 
 const errorMessage = ref('')
 
-const handleLogin = () => {
-  const result = login({
-    username: form.username,
-    password: form.password
-  })
+const handleLogin = async () => {
+  errorMessage.value = ''
 
-  if (!result.success) {
-    errorMessage.value = result.message
-    return
+  try {
+    const result = await login({
+      username: form.username,
+      password: form.password
+    })
+
+    if (!result.success) {
+      errorMessage.value = result.message
+      return
+    }
+
+    const redirectPath = typeof route.query.redirect === 'string' ? route.query.redirect : '/'
+    router.push(redirectPath)
+  } catch (error) {
+    errorMessage.value = error?.message || '登录失败，请稍后重试'
   }
-
-  const redirectPath = typeof route.query.redirect === 'string' ? route.query.redirect : '/'
-  router.push(redirectPath)
 }
 </script>
 

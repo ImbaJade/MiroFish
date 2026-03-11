@@ -22,6 +22,11 @@ from ..models.project import ProjectManager, ProjectStatus
 logger = get_logger('mirofish.api')
 
 
+def _requires_zep_api_key() -> bool:
+    """当前后端是否需要 Zep API Key。"""
+    return (Config.MEMORY_BACKEND or 'zep').lower() == 'zep'
+
+
 def allowed_file(filename: str) -> bool:
     """检查文件扩展名是否允许"""
     if not filename or '.' not in filename:
@@ -284,7 +289,7 @@ def build_graph():
         
         # 检查配置
         errors = []
-        if not Config.ZEP_API_KEY:
+        if _requires_zep_api_key() and not Config.ZEP_API_KEY:
             errors.append("ZEP_API_KEY未配置")
         if errors:
             logger.error(f"配置错误: {errors}")
@@ -567,7 +572,7 @@ def get_graph_data(graph_id: str):
     获取图谱数据（节点和边）
     """
     try:
-        if not Config.ZEP_API_KEY:
+        if _requires_zep_api_key() and not Config.ZEP_API_KEY:
             return jsonify({
                 "success": False,
                 "error": "ZEP_API_KEY未配置"
@@ -595,7 +600,7 @@ def delete_graph(graph_id: str):
     删除Zep图谱
     """
     try:
-        if not Config.ZEP_API_KEY:
+        if _requires_zep_api_key() and not Config.ZEP_API_KEY:
             return jsonify({
                 "success": False,
                 "error": "ZEP_API_KEY未配置"

@@ -116,6 +116,18 @@ With Docker Compose, start MiroFish and connect to your already deployed local m
 docker compose up -d
 ```
 
+For fully air-gapped deployment, prepare and transfer the image from an online machine first:
+
+```bash
+# Online machine
+docker pull ghcr.io/imbajade/mirofish:latest
+docker save ghcr.io/imbajade/mirofish:latest -o mirofish_latest.tar
+
+# Offline machine
+docker load -i mirofish_latest.tar
+docker compose up -d
+```
+
 > `MEMORY_BACKEND=zep` remains supported; if `mem0` package is unavailable, backend gracefully falls back to `local`.
 
 ## 🚀 Quick Start

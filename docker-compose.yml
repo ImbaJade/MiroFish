@@ -6,6 +6,12 @@ services:
     container_name: mirofish
     env_file:
       - .env
+    environment:
+      # 纯离线环境建议默认开启离线模式，避免误用云端图记忆
+      OFFLINE_MODE: ${OFFLINE_MODE:-true}
+      MEMORY_BACKEND: ${MEMORY_BACKEND:-local}
+      # 容器内无桌面环境，禁止 Vite 启动时尝试打开浏览器
+      VITE_OPEN_BROWSER: ${VITE_OPEN_BROWSER:-false}
     ports:
       - "3000:3000"
       - "5001:5001"

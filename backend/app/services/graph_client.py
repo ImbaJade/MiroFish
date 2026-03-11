@@ -24,16 +24,31 @@ from ..utils.logger import get_logger
 logger = get_logger("mirofish.graph_client")
 
 
-class EpisodeData:
-    def __init__(self, data: str, type: str = "text"):
-        self.data = data
-        self.type = type
+try:
+    from zep_cloud.types import EpisodeData, EntityEdgeSourceTarget
+except ImportError:
+    class EpisodeData:
+        def __init__(self, data: str, type: str = "text"):
+            self.data = data
+            self.type = type
+
+        def dict(self) -> Dict[str, str]:
+            return {"data": self.data, "type": self.type}
+
+        def model_dump(self) -> Dict[str, str]:
+            return self.dict()
 
 
-class EntityEdgeSourceTarget:
-    def __init__(self, source: str, target: str):
-        self.source = source
-        self.target = target
+    class EntityEdgeSourceTarget:
+        def __init__(self, source: str, target: str):
+            self.source = source
+            self.target = target
+
+        def dict(self) -> Dict[str, str]:
+            return {"source": self.source, "target": self.target}
+
+        def model_dump(self) -> Dict[str, str]:
+            return self.dict()
 
 
 def _obj(**kwargs):
@@ -42,7 +57,7 @@ def _obj(**kwargs):
 
 class _LocalStore:
     def __init__(self):
-        self.root = Path(__file__).resolve().parents[1] / "uploads" / "local_graph_store"
+        self.root = Path(__file__).resolve().parents[2] / "uploads" / "local_graph_store"
         self.root.mkdir(parents=True, exist_ok=True)
 
     def _path(self, graph_id: str) -> Path:
@@ -393,7 +408,7 @@ class Mem0GraphClient:
                     "provider": "chroma",
                     "config": {
                         "collection_name": "mirofish_mem0",
-                        "path": str(Path(__file__).resolve().parents[1] / "uploads" / "mem0_store"),
+                        "path": str(Path(__file__).resolve().parents[2] / "uploads" / "mem0_store"),
                     },
                 },
             }

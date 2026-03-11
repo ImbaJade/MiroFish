@@ -313,6 +313,7 @@ OFFLINE_MODE=true
 MEMORY_BACKEND=mem0
 LLM_BASE_URL=http://host.docker.internal:8000/v1
 LLM_MODEL_NAME=Qwen/Qwen2.5-14B-Instruct
+MEM0_MODEL_NAME=Qwen/Qwen2.5-14B-Instruct
 LLM_API_KEY=offline-local-key
 ```
 
@@ -342,6 +343,7 @@ PY
 
 > 说明：这里的 `mem0` 使用本地 Chroma 向量库存储（默认目录 `backend/uploads/mem0_store`），不需要单独申请 mem0 云端 URL。
 > 若你使用本地 OpenAI 兼容服务（如 Ollama/vLLM），配置好 `LLM_BASE_URL/LLM_API_KEY` 即可，系统会自动桥接到 `OPENAI_BASE_URL/OPENAI_API_KEY`。
+> 如需覆盖 mem0 默认模型，可在 `.env` 中设置 `MEM0_MODEL_NAME`（未设置时回退到 `LLM_MODEL_NAME`，兼容旧变量 `MEM0_LLM_MODEL_NAME`）。
 
 若部署机完全离线，请先从联网机器导出镜像并在离线机器导入：
 

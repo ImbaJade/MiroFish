@@ -33,6 +33,9 @@ class Config:
     LLM_API_KEY = os.environ.get('LLM_API_KEY')
     LLM_BASE_URL = os.environ.get('LLM_BASE_URL', 'https://api.openai.com/v1')
     LLM_MODEL_NAME = os.environ.get('LLM_MODEL_NAME', 'gpt-4o-mini')
+
+    # 可选：mem0 专用 LLM 模型名（优先 MEM0_MODEL_NAME；兼容旧变量 MEM0_LLM_MODEL_NAME）
+    MEM0_MODEL_NAME = os.environ.get('MEM0_MODEL_NAME') or os.environ.get('MEM0_LLM_MODEL_NAME') or LLM_MODEL_NAME
     
     # 可选：向量化服务（用于 mem0 / 语义增强）
     EMBEDDING_API_BASE_URL = os.environ.get('EMBEDDING_API_BASE_URL')

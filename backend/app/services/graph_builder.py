@@ -315,11 +315,15 @@ class GraphBuilderService:
                     progress
                 )
             
-            # 构建episode数据
-            episodes = [
-                EpisodeData(data=chunk, type="text")
-                for chunk in batch_chunks
-            ]
+            # 构建 episode 数据
+            # 注意：在 Zep 后端下必须使用 zep_cloud.types.EpisodeData，
+            # 否则 SDK 序列化会因自定义对象而失败。
+            if getattr(self.client, "is_local", False):
+                episodes = [EpisodeData(data=chunk, type="text") for chunk in batch_chunks]
+            else:
+                from zep_cloud.types import EpisodeData as ZepEpisodeData
+
+                episodes = [ZepEpisodeData(data=chunk, type="text") for chunk in batch_chunks]
             
             # 发送到Zep
             try:

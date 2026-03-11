@@ -35,6 +35,13 @@ class EntityEdgeSourceTarget:
         self.source = source
         self.target = target
 
+    def dict(self) -> Dict[str, str]:
+        """兼容 zep SDK 在 set_entity_types 中的序列化调用。"""
+        return {"source": self.source, "target": self.target}
+
+    def to_dict(self) -> Dict[str, str]:
+        return self.dict()
+
 
 def _obj(**kwargs):
     return SimpleNamespace(**kwargs)
@@ -42,7 +49,7 @@ def _obj(**kwargs):
 
 class _LocalStore:
     def __init__(self):
-        self.root = Path(__file__).resolve().parents[1] / "uploads" / "local_graph_store"
+        self.root = Path(__file__).resolve().parents[2] / "uploads" / "local_graph_store"
         self.root.mkdir(parents=True, exist_ok=True)
 
     def _path(self, graph_id: str) -> Path:
@@ -393,7 +400,7 @@ class Mem0GraphClient:
                     "provider": "chroma",
                     "config": {
                         "collection_name": "mirofish_mem0",
-                        "path": str(Path(__file__).resolve().parents[1] / "uploads" / "mem0_store"),
+                        "path": str(Path(__file__).resolve().parents[2] / "uploads" / "mem0_store"),
                     },
                 },
             }

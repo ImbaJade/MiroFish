@@ -9,11 +9,12 @@ import warnings
 # 需要在所有其他导入之前设置
 warnings.filterwarnings("ignore", message=".*resource_tracker.*")
 
-from flask import Flask, request
+from flask import Flask, request, jsonify
 from flask_cors import CORS
 
 from .config import Config
 from .utils.logger import setup_logger, get_logger
+from .utils.auth import verify_auth_token
 
 
 def create_app(config_class=Config):
@@ -61,9 +62,36 @@ def create_app(config_class=Config):
         logger = get_logger('mirofish.request')
         logger.debug(f"响应: {response.status_code}")
         return response
+
+    @app.before_request
+    def require_auth_for_api():
+        if request.method == 'OPTIONS':
+            return None
+
+        if not app.config.get('AUTH_ENABLED', True):
+            return None
+
+        path = request.path or ''
+        if not path.startswith('/api/'):
+            return None
+
+        if path in {'/api/auth/login', '/api/auth/verify'}:
+            return None
+
+        auth_header = request.headers.get('Authorization', '')
+        if not auth_header.startswith('Bearer '):
+            return jsonify({"success": False, "error": "未登录或登录已过期"}), 401
+
+        token = auth_header[7:]
+        username = verify_auth_token(token)
+        if not username:
+            return jsonify({"success": False, "error": "登录令牌无效，请重新登录"}), 401
+
+        return None
     
     # 注册蓝图
-    from .api import graph_bp, simulation_bp, report_bp
+    from .api import graph_bp, simulation_bp, report_bp, auth_bp
+    app.register_blueprint(auth_bp, url_prefix='/api/auth')
     app.register_blueprint(graph_bp, url_prefix='/api/graph')
     app.register_blueprint(simulation_bp, url_prefix='/api/simulation')
     app.register_blueprint(report_bp, url_prefix='/api/report')

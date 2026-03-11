@@ -1,5 +1,7 @@
 import axios from 'axios'
 
+const TOKEN_KEY = 'mirofish_auth_token'
+
 // 创建axios实例
 const service = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:5001',
@@ -12,6 +14,10 @@ const service = axios.create({
 // 请求拦截器
 service.interceptors.request.use(
   config => {
+    const token = localStorage.getItem(TOKEN_KEY)
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`
+    }
     return config
   },
   error => {
@@ -35,6 +41,14 @@ service.interceptors.response.use(
   },
   error => {
     console.error('Response error:', error)
+
+    if (error?.response?.status === 401) {
+      localStorage.removeItem(TOKEN_KEY)
+      if (window.location.pathname !== '/login') {
+        const redirect = encodeURIComponent(window.location.pathname + window.location.search)
+        window.location.href = `/login?redirect=${redirect}`
+      }
+    }
     
     // 处理超时
     if (error.code === 'ECONNABORTED' && error.message.includes('timeout')) {

@@ -322,6 +322,27 @@ LLM_API_KEY=offline-local-key
 docker compose up -d
 ```
 
+#### 离线安装 mem0（源码部署）
+
+如果你希望真正启用 `MEMORY_BACKEND=mem0`（而不是自动回退 `local`），需要在后端运行环境中安装 `mem0`：
+
+```bash
+cd backend
+pip install "mem0ai>=0.1.0" "chromadb>=0.5.0"
+```
+
+安装完成后建议做一次最小校验：
+
+```bash
+python - <<'PY'
+from mem0 import Memory
+print("mem0 import ok")
+PY
+```
+
+> 说明：这里的 `mem0` 使用本地 Chroma 向量库存储（默认目录 `backend/uploads/mem0_store`），不需要单独申请 mem0 云端 URL。
+> 若你使用本地 OpenAI 兼容服务（如 Ollama/vLLM），配置好 `LLM_BASE_URL/LLM_API_KEY` 即可，系统会自动桥接到 `OPENAI_BASE_URL/OPENAI_API_KEY`。
+
 若部署机完全离线，请先从联网机器导出镜像并在离线机器导入：
 
 ```bash

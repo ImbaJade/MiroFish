@@ -434,8 +434,20 @@ class Mem0GraphClient:
 
             _prepare_mem0_openai_env()
 
+            mem0_llm_config = {
+                "model": Config.MEM0_MODEL_NAME,
+            }
+            if os.environ.get("OPENAI_API_KEY"):
+                mem0_llm_config["api_key"] = os.environ.get("OPENAI_API_KEY")
+            if os.environ.get("OPENAI_BASE_URL"):
+                mem0_llm_config["openai_base_url"] = os.environ.get("OPENAI_BASE_URL")
+
             cfg = {
                 "version": "v1.1",
+                "llm": {
+                    "provider": "openai",
+                    "config": mem0_llm_config,
+                },
                 "vector_store": {
                     "provider": "chroma",
                     "config": {

@@ -107,6 +107,7 @@ OFFLINE_MODE=true
 MEMORY_BACKEND=mem0
 LLM_BASE_URL=http://host.docker.internal:8000/v1
 LLM_MODEL_NAME=Qwen/Qwen2.5-14B-Instruct
+MEM0_MODEL_NAME=Qwen/Qwen2.5-14B-Instruct
 LLM_API_KEY=offline-local-key
 ```
 
@@ -134,6 +135,7 @@ PY
 
 > mem0 in this project uses a local Chroma store (default path: `backend/uploads/mem0_store`) and does not require a separate mem0 cloud URL.
 > If you use a local OpenAI-compatible endpoint (Ollama/vLLM), configure `LLM_BASE_URL/LLM_API_KEY`; the app bridges them to `OPENAI_BASE_URL/OPENAI_API_KEY` for mem0.
+> To override mem0's default model, set `MEM0_MODEL_NAME` in `.env` (falls back to `LLM_MODEL_NAME` when omitted; legacy `MEM0_LLM_MODEL_NAME` is still supported).
 
 For fully air-gapped deployment, prepare and transfer the image from an online machine first:
 

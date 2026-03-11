@@ -117,6 +117,18 @@ LLM_API_KEY=offline-local-key
 docker compose up -d
 ```
 
+纯离线环境（无外网）请先在联网机器准备镜像，再导入到离线机器：
+
+```bash
+# 联网机器
+docker pull ghcr.io/imbajade/mirofish:latest
+docker save ghcr.io/imbajade/mirofish:latest -o mirofish_latest.tar
+
+# 离线机器
+docker load -i mirofish_latest.tar
+docker compose up -d
+```
+
 > 说明：`MEMORY_BACKEND=zep` 仍可继续使用原有云端图谱流程；`mem0` 未安装时会自动降级到 `local`。
 
 ## 🚀 快速开始
@@ -307,6 +319,18 @@ LLM_API_KEY=offline-local-key
 #### Docker 一键启动（连接本地已部署模型服务）
 
 ```bash
+docker compose up -d
+```
+
+若部署机完全离线，请先从联网机器导出镜像并在离线机器导入：
+
+```bash
+# 联网机器
+docker pull ghcr.io/imbajade/mirofish:latest
+docker save ghcr.io/imbajade/mirofish:latest -o mirofish_latest.tar
+
+# 离线机器
+docker load -i mirofish_latest.tar
 docker compose up -d
 ```
 

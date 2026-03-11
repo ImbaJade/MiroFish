@@ -29,6 +29,11 @@ def create_app(config_class=Config):
     
     # 设置日志
     logger = setup_logger('mirofish')
+
+    # 在应用工厂中强制校验配置，避免绕过 run.py 直接启动时漏检
+    config_errors = config_class.validate()
+    if config_errors:
+        raise RuntimeError('配置错误: ' + '; '.join(config_errors))
     
     # 只在 reloader 子进程中打印启动信息（避免 debug 模式下打印两次）
     is_reloader_process = os.environ.get('WERKZEUG_RUN_MAIN') == 'true'

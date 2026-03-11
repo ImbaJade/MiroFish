@@ -29,6 +29,13 @@ def create_app(config_class=Config):
     
     # 设置日志
     logger = setup_logger('mirofish')
+
+    # 在应用工厂中执行可选配置校验：兼容仅提供大写配置项的自定义 config 类
+    validate_config = getattr(config_class, 'validate', None)
+    if callable(validate_config):
+        config_errors = validate_config()
+        if config_errors:
+            raise RuntimeError('配置错误: ' + '; '.join(config_errors))
     
     # 只在 reloader 子进程中打印启动信息（避免 debug 模式下打印两次）
     is_reloader_process = os.environ.get('WERKZEUG_RUN_MAIN') == 'true'

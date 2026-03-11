@@ -21,7 +21,9 @@ class Config:
     """Flask配置类"""
     
     # Flask配置
-    SECRET_KEY = os.environ.get('SECRET_KEY', 'mirofish-secret-key')
+    DEFAULT_SECRET_KEY = 'mirofish-secret-key'
+    EXAMPLE_SECRET_KEY_PLACEHOLDER = 'please-change-this-to-a-random-secret'
+    SECRET_KEY = os.environ.get('SECRET_KEY', DEFAULT_SECRET_KEY)
     DEBUG = os.environ.get('FLASK_DEBUG', 'True').lower() == 'true'
     
     # JSON配置 - 禁用ASCII转义，让中文直接显示（而不是 \uXXXX 格式）
@@ -83,6 +85,13 @@ class Config:
     def validate(cls):
         """验证必要配置"""
         errors = []
+        secret_key = (cls.SECRET_KEY or '').strip()
+        forbidden_secret_keys = {
+            cls.DEFAULT_SECRET_KEY,
+            cls.EXAMPLE_SECRET_KEY_PLACEHOLDER,
+        }
+        if cls.AUTH_ENABLED and (not secret_key or secret_key in forbidden_secret_keys):
+            errors.append("AUTH_ENABLED=true 时必须配置非默认、非示例占位且非空的 SECRET_KEY")
         if not cls.LLM_API_KEY and not cls.OFFLINE_MODE:
             errors.append("LLM_API_KEY 未配置（离线模式可忽略）")
         if cls.MEMORY_BACKEND.lower() not in {'zep', 'local', 'mem0'}:
@@ -90,4 +99,3 @@ class Config:
         if cls.MEMORY_BACKEND.lower() == 'zep' and not cls.ZEP_API_KEY:
             errors.append("ZEP_API_KEY 未配置（MEMORY_BACKEND=zep 时必填）")
         return errors
-

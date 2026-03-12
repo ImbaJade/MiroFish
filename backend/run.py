@@ -12,6 +12,7 @@ def _disable_third_party_telemetry() -> None:
     os.environ.setdefault('DISABLE_TELEMETRY', 'true')
     os.environ.setdefault('ANONYMIZED_TELEMETRY', 'False')
     os.environ.setdefault('DO_NOT_TRACK', '1')
+    os.environ.setdefault('MEM0_TELEMETRY', 'False')
 
 
 _disable_third_party_telemetry()

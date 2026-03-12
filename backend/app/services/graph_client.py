@@ -85,6 +85,11 @@ def _prepare_mem0_openai_env() -> None:
 
 
 
+def _disable_mem0_telemetry() -> None:
+    """Explicitly disable mem0 telemetry in offline/intranet environments."""
+    os.environ.setdefault("MEM0_TELEMETRY", "False")
+
+
 class _LocalStore:
     def __init__(self):
         self.root = Path(__file__).resolve().parents[2] / "uploads" / "local_graph_store"
@@ -430,9 +435,10 @@ class Mem0GraphClient:
         self._enabled = False
 
         try:
-            from mem0 import Memory  # type: ignore
-
+            _disable_mem0_telemetry()
             _prepare_mem0_openai_env()
+
+            from mem0 import Memory  # type: ignore
 
             mem0_llm_config = {
                 "model": Config.MEM0_MODEL_NAME,

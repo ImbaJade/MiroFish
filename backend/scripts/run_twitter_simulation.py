@@ -41,6 +41,7 @@ os.environ.setdefault('POSTHOG_DISABLED', 'true')
 os.environ.setdefault('DISABLE_TELEMETRY', 'true')
 os.environ.setdefault('ANONYMIZED_TELEMETRY', 'False')
 os.environ.setdefault('DO_NOT_TRACK', '1')
+os.environ.setdefault('MEM0_TELEMETRY', 'False')
 
 # 加载项目根目录的 .env 文件（包含 LLM_API_KEY 等配置）
 from dotenv import load_dotenv

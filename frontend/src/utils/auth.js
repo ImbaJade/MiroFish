@@ -9,7 +9,7 @@ export const login = async ({ username, password }) => {
   })
 
   const payload = response?.data ?? response
-  const token = payload?.token
+  const token = payload?.token || payload?.data?.token
   if (!token) {
     return {
       success: false,

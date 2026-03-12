@@ -34,6 +34,15 @@ class Config:
     LLM_BASE_URL = os.environ.get('LLM_BASE_URL', 'https://api.openai.com/v1')
     LLM_MODEL_NAME = os.environ.get('LLM_MODEL_NAME', 'gpt-4o-mini')
 
+    # tiktoken 离线缓存配置（避免内网环境解析 openaipublic.blob.core.windows.net 失败）
+    TIKTOKEN_CACHE_DIR = os.environ.get(
+        'TIKTOKEN_CACHE_DIR',
+        os.path.join(os.path.dirname(__file__), '../.cache/tiktoken')
+    )
+    TIKTOKEN_O200K_BASE_FILE = os.environ.get('TIKTOKEN_O200K_BASE_FILE')
+    TIKTOKEN_AUTO_FETCH = os.environ.get('TIKTOKEN_AUTO_FETCH', 'true').lower() == 'true'
+    TIKTOKEN_ENABLE_OFFLINE_FALLBACK = os.environ.get('TIKTOKEN_ENABLE_OFFLINE_FALLBACK', 'true').lower() == 'true'
+
     # 可选：mem0 专用 LLM 模型名（优先 MEM0_MODEL_NAME；兼容旧变量 MEM0_LLM_MODEL_NAME）
     MEM0_MODEL_NAME = os.environ.get('MEM0_MODEL_NAME') or os.environ.get('MEM0_LLM_MODEL_NAME') or LLM_MODEL_NAME
     

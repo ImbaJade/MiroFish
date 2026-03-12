@@ -32,10 +32,22 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from app import create_app
 from app.config import Config
+from app.utils.logger import get_logger
+from app.utils.tiktoken_cache import (
+    apply_tiktoken_offline_fallback,
+    ensure_tiktoken_o200k_cache,
+)
 
 
 def main():
     """主函数"""
+    startup_logger = get_logger('mirofish.startup')
+    ensure_tiktoken_o200k_cache(startup_logger)
+    try:
+        apply_tiktoken_offline_fallback(startup_logger)
+    except Exception as exc:
+        startup_logger.warning(f"tiktoken 离线降级初始化失败: {exc}")
+
     # 验证配置
     errors = Config.validate()
     if errors:

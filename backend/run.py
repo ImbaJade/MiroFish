@@ -5,6 +5,17 @@ MiroFish Backend 启动入口
 import os
 import sys
 
+
+def _disable_third_party_telemetry() -> None:
+    """Best-effort disable of anonymous telemetry in third-party dependencies."""
+    os.environ.setdefault('POSTHOG_DISABLED', 'true')
+    os.environ.setdefault('DISABLE_TELEMETRY', 'true')
+    os.environ.setdefault('ANONYMIZED_TELEMETRY', 'False')
+    os.environ.setdefault('DO_NOT_TRACK', '1')
+
+
+_disable_third_party_telemetry()
+
 # 解决 Windows 控制台中文乱码问题：在所有导入之前设置 UTF-8 编码
 if sys.platform == 'win32':
     # 设置环境变量确保 Python 使用 UTF-8
@@ -47,4 +58,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-

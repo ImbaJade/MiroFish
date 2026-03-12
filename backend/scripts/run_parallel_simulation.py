@@ -89,6 +89,12 @@ _project_root = os.path.abspath(os.path.join(_backend_dir, '..'))
 sys.path.insert(0, _scripts_dir)
 sys.path.insert(0, _backend_dir)
 
+# 禁用第三方匿名遥测（避免离线环境中的 posthog 上报报错）
+os.environ.setdefault('POSTHOG_DISABLED', 'true')
+os.environ.setdefault('DISABLE_TELEMETRY', 'true')
+os.environ.setdefault('ANONYMIZED_TELEMETRY', 'False')
+os.environ.setdefault('DO_NOT_TRACK', '1')
+
 # 加载项目根目录的 .env 文件（包含 LLM_API_KEY 等配置）
 from dotenv import load_dotenv
 _env_file = os.path.join(_project_root, '.env')

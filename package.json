@@ -7,7 +7,7 @@
     "setup:backend": "cd backend && uv sync && uv pip install --python .venv/bin/python -r requirements.txt",
     "setup:all": "npm run setup && npm run setup:backend",
     "dev": "concurrently --kill-others -n \"backend,frontend\" -c \"green,cyan\" \"npm run backend\" \"npm run frontend\"",
-    "backend": "cd backend && if [ -x .venv/bin/python ]; then .venv/bin/python run.py; else echo 'Backend .venv not found. Please prebuild dependencies (npm run setup:backend) before offline startup.'; exit 1; fi",
+    "backend": "node scripts/run-backend.js",
     "frontend": "cd frontend && npm run dev",
     "build": "cd frontend && npm run build"
   },

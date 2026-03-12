@@ -89,13 +89,6 @@ _project_root = os.path.abspath(os.path.join(_backend_dir, '..'))
 sys.path.insert(0, _scripts_dir)
 sys.path.insert(0, _backend_dir)
 
-# 禁用第三方匿名遥测（避免离线环境中的 posthog 上报报错）
-os.environ.setdefault('POSTHOG_DISABLED', 'true')
-os.environ.setdefault('DISABLE_TELEMETRY', 'true')
-os.environ.setdefault('ANONYMIZED_TELEMETRY', 'False')
-os.environ.setdefault('DO_NOT_TRACK', '1')
-os.environ.setdefault('MEM0_TELEMETRY', 'False')
-
 # 加载项目根目录的 .env 文件（包含 LLM_API_KEY 等配置）
 from dotenv import load_dotenv
 _env_file = os.path.join(_project_root, '.env')
@@ -108,6 +101,13 @@ else:
     if os.path.exists(_backend_env):
         load_dotenv(_backend_env)
         print(f"已加载环境配置: {_backend_env}")
+
+# 默认禁用第三方匿名遥测（优先级：父进程环境变量 > .env > 此处默认值）
+os.environ.setdefault('POSTHOG_DISABLED', 'true')
+os.environ.setdefault('DISABLE_TELEMETRY', 'true')
+os.environ.setdefault('ANONYMIZED_TELEMETRY', 'False')
+os.environ.setdefault('DO_NOT_TRACK', '1')
+os.environ.setdefault('MEM0_TELEMETRY', 'False')
 
 
 class MaxTokensWarningFilter(logging.Filter):

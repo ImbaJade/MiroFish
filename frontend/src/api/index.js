@@ -2,9 +2,18 @@ import axios from 'axios'
 
 const TOKEN_KEY = 'mirofish_auth_token'
 
+const resolveBaseURL = () => {
+  const configured = import.meta.env.VITE_API_BASE_URL?.trim()
+  if (configured) return configured
+
+  // 纯内网/离线部署默认走同源，由网关或 Nginx 统一转发 /api
+  // 若前后端分端口部署，请显式设置 VITE_API_BASE_URL（如 http://<host>:5001）
+  return ''
+}
+
 // 创建axios实例
 const service = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:5001',
+  baseURL: resolveBaseURL(),
   timeout: 300000, // 5分钟超时（本体生成可能需要较长时间）
   headers: {
     'Content-Type': 'application/json'
@@ -42,6 +51,10 @@ service.interceptors.response.use(
   error => {
     console.error('Response error:', error)
 
+    const backendErrorMessage =
+      error?.response?.data?.error ||
+      error?.response?.data?.message
+
     if (error?.response?.status === 401) {
       localStorage.removeItem(TOKEN_KEY)
       if (window.location.pathname !== '/login') {
@@ -57,7 +70,16 @@ service.interceptors.response.use(
     
     // 处理网络错误
     if (error.message === 'Network Error') {
+      const isApiPath = typeof error?.config?.url === 'string' && error.config.url.startsWith('/api/')
+      const configured = import.meta.env.VITE_API_BASE_URL?.trim()
+      if (isApiPath && !configured) {
+        error.message = '网络错误：无法连接后端 API。当前使用同源 /api，请确认网关已转发 /api，或设置 VITE_API_BASE_URL。'
+      }
       console.error('Network error - please check your connection')
+    }
+
+    if (backendErrorMessage) {
+      error.message = backendErrorMessage
     }
     
     return Promise.reject(error)

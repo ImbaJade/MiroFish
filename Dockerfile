@@ -1,5 +1,9 @@
 FROM python:3.11
 
+# 运行期禁止 uv 触发隐式同步/下载，避免离线环境访问外网
+ENV UV_NO_SYNC=1 \
+    UV_PYTHON_DOWNLOADS=never
+
 # 安装 Node.js（满足 >=18）及 Python 编译依赖
 RUN apt-get update \
   && apt-get install -y --no-install-recommends nodejs npm build-essential curl \

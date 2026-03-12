@@ -91,55 +91,62 @@ def ensure_tiktoken_o200k_cache(logger) -> Optional[str]:
 
 
 def apply_tiktoken_offline_fallback(logger) -> bool:
-    """在无法获取 o200k_base 时，降级为本地 byte-level 编码，避免首次离线运行直接失败。"""
+    """安装 o200k_base 的离线兜底，避免首次离线启动时触发公网下载。"""
     if not Config.TIKTOKEN_ENABLE_OFFLINE_FALLBACK:
         return False
 
     try:
-        import tiktoken
         import tiktoken.registry as registry
         from tiktoken_ext import openai_public
     except Exception as exc:  # pragma: no cover - 极端导入失败
         raise TiktokenFallbackError(f"导入 tiktoken 失败: {exc}") from exc
 
-    try:
-        tiktoken.get_encoding("o200k_base")
-        return False
-    except Exception:
-        pass
-
     original_o200k_base = openai_public.o200k_base
+    if getattr(original_o200k_base, "_mirofish_offline_fallback", False):
+        return False
+
+    cache_dir = Config.TIKTOKEN_CACHE_DIR
+    cache_file = _cache_file_path(cache_dir, O200K_BLOB_URL) if cache_dir else None
+    # 关键：离线推荐配置（无缓存 + 禁止自动下载）下，直接走本地兜底，不触发任何网络尝试。
+    force_offline = bool(cache_file and (not cache_file.exists()) and (not Config.TIKTOKEN_AUTO_FETCH))
+
+    def _local_byte_level_o200k_base():
+        mergeable_ranks = {bytes([i]): i for i in range(256)}
+        return {
+            "name": "o200k_base",
+            "pat_str": r"(?s).",
+            "mergeable_ranks": mergeable_ranks,
+            "special_tokens": {
+                "<|endoftext|>": 199999,
+                "<|endofprompt|>": 200018,
+            },
+        }
 
     def _offline_o200k_base():
+        if force_offline:
+            return _local_byte_level_o200k_base()
+
         try:
             return original_o200k_base()
         except Exception:
-            # 构造纯本地 byte-level 编码，避免任何网络请求。
-            mergeable_ranks = {bytes([i]): i for i in range(256)}
-            return {
-                "name": "o200k_base",
-                "pat_str": r"(?s).",
-                "mergeable_ranks": mergeable_ranks,
-                "special_tokens": {
-                    "<|endoftext|>": 199999,
-                    "<|endofprompt|>": 200018,
-                },
-            }
+            return _local_byte_level_o200k_base()
+
+    _offline_o200k_base._mirofish_offline_fallback = True  # type: ignore[attr-defined]
 
     openai_public.o200k_base = _offline_o200k_base
 
     if registry.ENCODING_CONSTRUCTORS is not None and "o200k_base" in registry.ENCODING_CONSTRUCTORS:
         registry.ENCODING_CONSTRUCTORS["o200k_base"] = _offline_o200k_base
 
-    # 如果之前尝试过失败，清理潜在残留并重新加载
+    # 清理缓存构造结果，使后续使用新的构造函数
     registry.ENCODINGS.pop("o200k_base", None)
 
-    try:
-        tiktoken.get_encoding("o200k_base")
+    if force_offline:
         logger.warning(
-            "tiktoken o200k_base 已启用离线降级（映射到本地 byte-level 编码）。"
-            "这会影响 token 计数精度，但可避免首次离线运行失败。"
+            "tiktoken o200k_base 已启用离线强制兜底（本地 byte-level 编码）。"
+            "当前为无缓存且禁止自动下载模式，启动阶段不会触发公网请求。"
         )
-        return True
-    except Exception as exc:
-        raise TiktokenFallbackError(f"应用离线降级后仍无法加载 o200k_base: {exc}") from exc
+    else:
+        logger.info("已安装 tiktoken o200k_base 离线兜底（按需触发）。")
+
+    return True

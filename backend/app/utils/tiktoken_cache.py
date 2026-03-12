@@ -107,8 +107,11 @@ def apply_tiktoken_offline_fallback(logger) -> bool:
 
     cache_dir = Config.TIKTOKEN_CACHE_DIR
     cache_file = _cache_file_path(cache_dir, O200K_BLOB_URL) if cache_dir else None
-    # 关键：离线推荐配置（无缓存 + 禁止自动下载）下，直接走本地兜底，不触发任何网络尝试。
-    force_offline = bool(cache_file and (not cache_file.exists()) and (not Config.TIKTOKEN_AUTO_FETCH))
+    # 离线优先条件：只要声明离线模式或关闭自动下载，就避免先走原始构造器造成公网探测。
+    force_offline = bool(Config.OFFLINE_MODE or (not Config.TIKTOKEN_AUTO_FETCH))
+    # 兼容旧逻辑：无缓存 + 禁止自动下载同样属于离线优先。
+    if not force_offline:
+        force_offline = bool(cache_file and (not cache_file.exists()) and (not Config.TIKTOKEN_AUTO_FETCH))
 
     def _local_byte_level_o200k_base():
         mergeable_ranks = {bytes([i]): i for i in range(256)}
@@ -144,7 +147,8 @@ def apply_tiktoken_offline_fallback(logger) -> bool:
     if force_offline:
         logger.warning(
             "tiktoken o200k_base 已启用离线强制兜底（本地 byte-level 编码）。"
-            "当前为无缓存且禁止自动下载模式，启动阶段不会触发公网请求。"
+            "当前为离线优先模式（OFFLINE_MODE=true 或 TIKTOKEN_AUTO_FETCH=false），"
+            "不会先尝试公网构造器。"
         )
     else:
         logger.info("已安装 tiktoken o200k_base 离线兜底（按需触发）。")

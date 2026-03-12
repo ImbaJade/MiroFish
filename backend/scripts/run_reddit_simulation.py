@@ -46,6 +46,13 @@ else:
     if os.path.exists(_backend_env):
         load_dotenv(_backend_env)
 
+# 默认禁用第三方匿名遥测（优先级：父进程环境变量 > .env > 此处默认值）
+os.environ.setdefault('POSTHOG_DISABLED', 'true')
+os.environ.setdefault('DISABLE_TELEMETRY', 'true')
+os.environ.setdefault('ANONYMIZED_TELEMETRY', 'False')
+os.environ.setdefault('DO_NOT_TRACK', '1')
+os.environ.setdefault('MEM0_TELEMETRY', 'False')
+
 
 import re
 
